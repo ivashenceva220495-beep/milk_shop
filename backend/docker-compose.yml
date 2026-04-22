@@ -13,6 +13,16 @@ services:
     volumes:
       - ./app:/app/app
 
+  frontend:
+    build: ../frontend
+    container_name: shop_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
   db:
     image: postgres:16
     container_name: shop_db

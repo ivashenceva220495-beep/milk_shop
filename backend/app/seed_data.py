@@ -1,3 +1,10 @@
+# app/seed_data.py
+import sys
+import os
+
+# Добавляем папку /app в путь (нужно для Docker)
+sys.path.insert(0, '/app')
+
 from app.database import SessionLocal, engine
 from app import models
 
