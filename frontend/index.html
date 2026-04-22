@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Молочный магазин - Ваш фермерский вкус</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .products-section, .cart-section, .order-status-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .products-section {
+            grid-column: 1 / -1;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .product-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .product-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .product-category {
+            color: #667eea;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            font-size: 1.5em;
+            color: #764ba2;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .product-stock {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .add-to-cart {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1em;
+            transition: opacity 0.3s;
+        }
+
+        .add-to-cart:hover {
+            opacity: 0.9;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .cart-total {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #667eea;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .checkout-form {
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .submit-order {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .status-check {
+            margin-top: 20px;
+        }
+
+        .status-result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .status-pending { background: #ffc107; color: #000; }
+        .status-confirmed { background: #17a2b8; color: #fff; }
+        .status-preparing { background: #fd7e14; color: #fff; }
+        .status-shipped { background: #007bff; color: #fff; }
+        .status-delivered { background: #28a745; color: #fff; }
+        .status-cancelled { background: #dc3545; color: #fff; }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🥛 Молочный магазин</h1>
+            <p class="subtitle">Свежие фермерские продукты с доставкой на дом</p>
+        </header>
+
+        <div class="dashboard">
+            <!-- Каталог продуктов -->
+            <div class="products-section">
+                <h2>📦 Наши продукты</h2>
+                <div class="products-grid" id="productsGrid"></div>
+            </div>
+
+            <!-- Корзина и оформление -->
+            <div class="cart-section">
+                <h2>🛒 Корзина</h2>
+                <div id="cartItems"></div>
+                <div id="cartTotal" class="cart-total"></div>
+
+                <div class="checkout-form">
+                    <h3>Оформление заказа</h3>
+                    <div class="form-group">
+                        <label>Ваше имя *</label>
+                        <input type="text" id="customerName" placeholder="Иван Иванов">
+                    </div>
+                    <div class="form-group">
+                        <label>Телефон *</label>
+                        <input type="tel" id="customerPhone" placeholder="+7 (999) 123-45-67">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="customerEmail" placeholder="ivan@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Адрес доставки *</label>
+                        <textarea id="customerAddress" rows="3" placeholder="г. Москва, ул. Примерная, д. 1, кв. 1"></textarea>
+                    </div>
+                    <button class="submit-order" onclick="createOrder()">✅ Оформить заказ</button>
+                </div>
+            </div>
+
+            <!-- Проверка статуса -->
+            <div class="order-status-section">
+                <h2>🔍 Проверить статус заказа</h2>
+                <div class="status-check">
+                    <div class="form-group">
+                        <label>Номер заказа</label>
+                        <input type="number" id="orderId" placeholder="Введите номер заказа">
+                    </div>
+                    <button onclick="checkOrderStatus()" style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Проверить</button>
+                </div>
+                <div id="statusResult" class="status-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1';
+        let products = [];
+        let cart = [];
+
+        // Загрузка продуктов
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_URL}/products`);
+                products = await response.json();
+                displayProducts();
+            } catch (error) {
+                console.error('Ошибка загрузки продуктов:', error);
+                showAlert('Не удалось загрузить продукты. Убедитесь, что сервер запущен.', 'error');
+            }
+        }
+
+        // Отображение продуктов
+        function displayProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-category">${getCategoryName(product.category)}</div>
+                    <div class="product-price">${product.price} ₽ / ${product.unit}</div>
+                    <div class="product-stock">В наличии: ${product.stock} ${product.unit}</div>
+                    <button class="add-to-cart" onclick="addToCart(${product.id})">🛒 В корзину</button>
+                </div>
+            `).join('');
+        }
+
+        function getCategoryName(category) {
+            const categories = {
+                'milk': '🥛 Молоко',
+                'cheese': '🧀 Сыр',
+                'yogurt': '🍦 Йогурт',
+                'butter': '🧈 Масло',
+                'sour_cream': '🥄 Сметана/Творог'
+            };
+            return categories[category] || category;
+        }
+
+        // Добавление в корзину
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const cartItem = cart.find(item => item.product_id === productId);
+            if (cartItem) {
+                cartItem.quantity++;
+            } else {
+                cart.push({
+                    product_id: productId,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1,
+                    unit: product.unit
+                });
+            }
+            updateCartDisplay();
+            showAlert(`${product.name} добавлен в корзину!`, 'success');
+        }
+
+        // Обновление отображения корзины
+        function updateCartDisplay() {
+            const cartDiv = document.getElementById('cartItems');
+            if (cart.length === 0) {
+                cartDiv.innerHTML = '<p style="text-align: center; color: #999;">Корзина пуста</p>';
+                document.getElementById('cartTotal').innerHTML = '';
+                return;
+            }
+
+            cartDiv.innerHTML = cart.map((item, index) => `
+                <div class="cart-item">
+                    <div>
+                        <strong>${item.name}</strong><br>
+                        ${item.price} ₽ / ${item.unit}
+                    </div>
+                    <div>
+                        <button onclick="updateQuantity(${index}, -1)" style="margin-right: 10px;">-</button>
+                        ${item.quantity}
+                        <button onclick="updateQuantity(${index}, 1)" style="margin-left: 10px;">+</button>
+                        <button onclick="removeFromCart(${index})" style="margin-left: 15px; color: red;">🗑️</button>
+                    </div>
+                    <div><strong>${(item.price * item.quantity).toFixed(2)} ₽</strong></div>
+                </div>
+            `).join('');
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('cartTotal').innerHTML = `<strong>Итого: ${total.toFixed(2)} ₽</strong>`;
+        }
+
+        function updateQuantity(index, delta) {
+            const newQuantity = cart[index].quantity + delta;
+            if (newQuantity <= 0) {
+                removeFromCart(index);
+            } else {
+                cart[index].quantity = newQuantity;
+                updateCartDisplay();
+            }
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartDisplay();
+        }
+
+        // Создание заказа
+        async function createOrder() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+
+            if (!name || !phone || !address) {
+                showAlert('Пожалуйста, заполните все обязательные поля', 'error');
+                return;
+            }
+
+            if (cart.length === 0) {
+                showAlert('Корзина пуста. Добавьте товары для оформления заказа.', 'error');
+                return;
+            }
+
+            const orderData = {
+                customer_name: name,
+                customer_phone: phone,
+                customer_email: document.getElementById('customerEmail').value.trim() || null,
+                address: address,
+                items: cart.map(item => ({
+                    product_id: item.product_id,
+                    quantity: item.quantity
+                }))
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                if (response.ok) {
+                    const order = await response.json();
+                    showAlert(`Заказ №${order.id} успешно создан! Сумма: ${order.total_amount} ₽`, 'success');
+                    cart = [];
+                    updateCartDisplay();
+                    document.getElementById('customerName').value = '';
+                    document.getElementById('customerPhone').value = '';
+                    document.getElementById('customerEmail').value = '';
+                    document.getElementById('customerAddress').value = '';
+                    loadProducts(); // Обновляем остатки
+                } else {
+                    const error = await response.json();
+                    showAlert(`Ошибка: ${error.detail}`, 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка создания заказа:', error);
+                showAlert('Не удалось создать заказ. Проверьте подключение к серверу.', 'error');
+            }
+        }
+
+        // Проверка статуса заказа
+        async function checkOrderStatus() {
+            const orderId = document.getElementById('orderId').value;
+            if (!orderId) {
+                showAlert('Введите номер заказа', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/orders/${orderId}`);
+                if (response.ok) {
+                    const status = await response.json();
+                    const resultDiv = document.getElementById('statusResult');
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `
+                        <h3>Заказ №${status.order_id}</h3>
+                        <p><strong>Клиент:</strong> ${status.customer_name}</p>
+                        <p><strong>Статус:</strong> <span class="status-badge status-${status.status}">${getStatusName(status.status)}</span></p>
+                        <p><strong>Последнее обновление:</strong> ${new Date(status.updated_at).toLocaleString('ru-RU')}</p>
+                    `;
+                } else if (response.status === 404) {
+                    showAlert('Заказ с таким номером не найден', 'error');
+                } else {
+                    showAlert('Ошибка при проверке статуса', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка проверки статуса:', error);
+                showAlert('Не удалось проверить статус. Проверьте подключение к серверу.', 'error');
+            }
+        }
+
+        function getStatusName(status) {
+            const statuses = {
+                'pending': '⏳ Ожидает подтверждения',
+                'confirmed': '✅ Подтвержден',
+                'preparing': '👨🍳 Готовится',
+                'shipped': '🚚 В пути',
+                'delivered': '🏠 Доставлен',
+                'cancelled': '❌ Отменен'
+            };
+            return statuses[status] || status;
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = message;
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '1000';
+            alertDiv.style.maxWidth = '400px';
+            document.body.appendChild(alertDiv);
+
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+
+        // Инициализация
+        loadProducts();
+    </script>
+</body>
+</html>
